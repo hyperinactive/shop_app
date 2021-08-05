@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/products.dart';
 import 'package:shop_app/screens/product_detail_screen.dart';
 import 'package:shop_app/screens/products_overview_screen.dart';
 import 'package:shop_app/themes/theme_data.dart';
@@ -12,14 +14,19 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ShopShop',
-      theme: themeData,
-      home: ProductsOverviewScreen(key: UniqueKey()),
-      routes: {
-        ProductDetailScreen.routeName: (BuildContext context) =>
-            ProductDetailScreen()
-      },
+    // can use many providers
+    // changenotifier creates a provider based on a class provided
+    return ChangeNotifierProvider<Products>(
+      create: (_) => Products(),
+      child: MaterialApp(
+        title: 'ShopShop',
+        theme: themeData,
+        home: ProductsOverviewScreen(key: UniqueKey()),
+        routes: {
+          ProductDetailScreen.routeName: (BuildContext context) =>
+              ProductDetailScreen()
+        },
+      ),
     );
   }
 }
