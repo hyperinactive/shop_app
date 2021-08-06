@@ -1,10 +1,15 @@
 import 'package:flutter/cupertino.dart';
-import 'package:shop_app/models/product.dart';
+import 'package:shop_app/providers/product.dart';
 
 // NOTE: dart only supports one parent to be extend
 // mixins don't make a stong relation, just allows additional functions
 // and properties to a class
 class Products with ChangeNotifier {
+  // used down in the code to make getter fetch favorited content or not
+  // meant for an application-wide filter
+  // not to be used when needing stuff filtered only on one screen
+  bool _showFavorites = false;
+
   final List<Product> _items = <Product>[
     Product(
       id: 'p1',
@@ -42,7 +47,18 @@ class Products with ChangeNotifier {
 
   List<Product> get items {
     // return a copy, respect the immutability
+    // if (_showFavorites) {
+    //   return _items
+    //       .where((Product element) => element.isFavorite == true)
+    //       .toList();
+    // }
     return <Product>[..._items];
+  }
+
+  List<Product> get favoriteItems {
+    return _items
+        .where((Product element) => element.isFavorite == true)
+        .toList();
   }
 
   void addProduct() {
@@ -53,5 +69,15 @@ class Products with ChangeNotifier {
 
   Product findById(String id) {
     return _items.firstWhere((Product element) => element.id == id);
+  }
+
+  void showFavoritesOnly() {
+    _showFavorites = true;
+    notifyListeners();
+  }
+
+  void showAll() {
+    _showFavorites = false;
+    notifyListeners();
   }
 }

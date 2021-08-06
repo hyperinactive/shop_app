@@ -16,15 +16,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // can use many providers
     // changenotifier creates a provider based on a class provided
+    // return ChangeNotifierProvider.value(value: Products()) // can be used when context isn't depended on
+    // recommendation, use create approach when instantiating once, but for repetative items, use value instead
     return ChangeNotifierProvider<Products>(
       create: (_) => Products(),
       child: MaterialApp(
         title: 'ShopShop',
         theme: themeData,
         home: ProductsOverviewScreen(key: UniqueKey()),
-        routes: {
+        routes: <String, WidgetBuilder>{
           ProductDetailScreen.routeName: (BuildContext context) =>
-              ProductDetailScreen()
+              const ProductDetailScreen()
         },
       ),
     );
