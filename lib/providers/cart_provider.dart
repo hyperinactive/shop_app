@@ -43,4 +43,13 @@ class CartProvider with ChangeNotifier {
   int get itemCount {
     return _items.length;
   }
+
+  double get totalAmout {
+    double total = 0.0;
+    // go through items and calculate the total
+    _items.forEach((_, Cart cart) {
+      total += cart.price * cart.quantity;
+    });
+    return total;
+  }
 }

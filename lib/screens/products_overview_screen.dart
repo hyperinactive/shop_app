@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/cart_provider.dart';
+import 'package:shop_app/screens/cart_screen.dart';
 import 'package:shop_app/widgets/cart_icon_button.dart';
 import 'package:shop_app/widgets/products_grid_view.dart';
 
@@ -64,6 +65,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           Consumer<CartProvider>(
             builder: (_, CartProvider cart, Widget? consumerChild) =>
                 CartIconButton(
+              // ignore: cast_nullable_to_non_nullable
               child: consumerChild as Widget,
               value: cart.itemCount.toString(),
             ),
@@ -71,7 +73,9 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
             // it won't rebuild cause it's outside of the builder method
             child: IconButton(
               icon: const Icon(Icons.shopping_cart),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pushNamed(CartScreen.routeName);
+              },
             ),
           ),
         ],
