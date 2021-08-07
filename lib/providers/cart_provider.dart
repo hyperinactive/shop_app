@@ -52,4 +52,10 @@ class CartProvider with ChangeNotifier {
     });
     return total;
   }
+
+  // removes an item form the map via id
+  void removeItem(String id) {
+    _items.remove(id);
+    notifyListeners();
+  }
 }
