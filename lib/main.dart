@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/providers/cart_provider.dart';
 import 'package:shop_app/providers/products.dart';
 import 'package:shop_app/screens/product_detail_screen.dart';
 import 'package:shop_app/screens/products_overview_screen.dart';
@@ -18,8 +19,13 @@ class MyApp extends StatelessWidget {
     // changenotifier creates a provider based on a class provided
     // return ChangeNotifierProvider.value(value: Products()) // can be used when context isn't depended on
     // recommendation, use create approach when instantiating once, but for repetative items, use value instead
-    return ChangeNotifierProvider<Products>(
-      create: (_) => Products(),
+
+    // settings up multiple providers
+    return MultiProvider(
+      providers: <ChangeNotifierProvider<dynamic>>[
+        ChangeNotifierProvider<Products>(create: (_) => Products()),
+        ChangeNotifierProvider<CartProvider>(create: (_) => CartProvider()),
+      ],
       child: MaterialApp(
         title: 'ShopShop',
         theme: themeData,

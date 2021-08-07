@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/cart_provider.dart';
+import 'package:shop_app/widgets/cart_icon_button.dart';
 import 'package:shop_app/widgets/products_grid_view.dart';
 
 enum FilterOptions {
@@ -55,7 +58,22 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
               ),
             ],
             icon: const Icon(Icons.more_vert),
-          )
+          ),
+          // because I don't want to rerender the whole page by calling a provider up top
+          // using the consumer so if changes happen, only its child gets rebuilt
+          Consumer<CartProvider>(
+            builder: (_, CartProvider cart, Widget? consumerChild) =>
+                CartIconButton(
+              child: consumerChild as Widget,
+              value: cart.itemCount.toString(),
+            ),
+            // consumerChild is the IconButton
+            // it won't rebuild cause it's outside of the builder method
+            child: IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: () {},
+            ),
+          ),
         ],
       ),
       body: ProductsGridView(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/providers/cart_provider.dart';
 import 'package:shop_app/providers/product.dart';
 import 'package:shop_app/screens/product_detail_screen.dart';
 
@@ -10,6 +11,7 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     // get the product info from the provider
     final Product product = Provider.of<Product>(context);
+    final CartProvider cart = Provider.of<CartProvider>(context);
 
     // ListTile equivalent
     return ClipRRect(
@@ -42,7 +44,10 @@ class ProductItem extends StatelessWidget {
             trailing: IconButton(
               icon: const Icon(Icons.shopping_cart),
               color: Theme.of(context).accentColor,
-              onPressed: () {},
+              onPressed: () {
+                cart.addItem(
+                    id: product.id, title: product.title, price: product.price);
+              },
             ),
           ),
         ),
