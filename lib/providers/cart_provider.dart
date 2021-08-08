@@ -3,10 +3,10 @@ import 'package:shop_app/models/cart_model.dart';
 import 'package:uuid/uuid.dart';
 
 class CartProvider with ChangeNotifier {
-  final Map<String, Cart> _items = <String, Cart>{};
+  Map<String, CartItemModel> _items = <String, CartItemModel>{};
 
-  Map<String, Cart> get items {
-    return <String, Cart>{..._items};
+  Map<String, CartItemModel> get items {
+    return <String, CartItemModel>{..._items};
   }
 
   // check if an item has already been added
@@ -21,7 +21,7 @@ class CartProvider with ChangeNotifier {
       // update gives the previous object in its callback
       _items.update(
           id,
-          (Cart prevItem) => Cart(
+          (CartItemModel prevItem) => CartItemModel(
                 id: prevItem.id,
                 title: prevItem.title,
                 quantity: prevItem.quantity + 1,
@@ -30,7 +30,7 @@ class CartProvider with ChangeNotifier {
     } else {
       _items.putIfAbsent(
           id,
-          () => Cart(
+          () => CartItemModel(
                 id: const Uuid().v4(),
                 title: title,
                 quantity: 1,
@@ -47,7 +47,7 @@ class CartProvider with ChangeNotifier {
   double get totalAmout {
     double total = 0.0;
     // go through items and calculate the total
-    _items.forEach((_, Cart cart) {
+    _items.forEach((_, CartItemModel cart) {
       total += cart.price * cart.quantity;
     });
     return total;
@@ -56,6 +56,11 @@ class CartProvider with ChangeNotifier {
   // removes an item form the map via id
   void removeItem(String id) {
     _items.remove(id);
+    notifyListeners();
+  }
+
+  void clear() {
+    _items = <String, CartItemModel>{};
     notifyListeners();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/cart_provider.dart';
+import 'package:shop_app/providers/orders.dart';
 import 'package:shop_app/widgets/cart_item.dart';
 
 class CartScreen extends StatelessWidget {
@@ -46,7 +47,14 @@ class CartScreen extends StatelessWidget {
                       backgroundColor: Theme.of(context).primaryColor,
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // add all items from the cart into an order
+                        // clear the cart as the orders aren't there anymore
+                        Provider.of<OrdersProvider>(context, listen: false)
+                            .addOrder(
+                                cart.items.values.toList(), cart.totalAmout);
+                        cart.clear();
+                      },
                       child: Text(
                         'Order!',
                         style: TextStyle(color: Theme.of(context).primaryColor),
@@ -58,7 +66,7 @@ class CartScreen extends StatelessWidget {
           const SizedBox(height: 10),
           Expanded(
               child: ListView.builder(
-            itemBuilder: (BuildContext context, int index) => CartItem(
+            itemBuilder: (BuildContext context, int index) => CartItemWidget(
               // converting map to list
               id: cart.items.values
                   .toList()[index]

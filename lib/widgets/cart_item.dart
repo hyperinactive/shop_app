@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/cart_provider.dart';
 
-class CartItem extends StatelessWidget {
-  const CartItem({
+class CartItemWidget extends StatelessWidget {
+  const CartItemWidget({
     Key? key,
     required this.id,
     required this.title,

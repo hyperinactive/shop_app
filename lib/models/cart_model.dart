@@ -1,5 +1,5 @@
-class Cart {
-  Cart({
+class CartItemModel {
+  CartItemModel({
     required this.id,
     required this.title,
     required this.quantity,
