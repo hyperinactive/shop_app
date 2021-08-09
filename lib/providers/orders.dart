@@ -4,14 +4,14 @@ import 'package:shop_app/models/order.dart';
 import 'package:uuid/uuid.dart';
 
 class OrdersProvider with ChangeNotifier {
-  List<Order> _orders = <Order>[];
+  final List<Order> _items = <Order>[];
 
-  List<Order> get orders {
-    return <Order>[..._orders];
+  List<Order> get items {
+    return <Order>[..._items];
   }
 
   void addOrder(List<CartItemModel> cartProducts, double total) {
-    _orders.insert(
+    _items.insert(
       0,
       Order(
         id: const Uuid().v4(),
@@ -21,5 +21,9 @@ class OrdersProvider with ChangeNotifier {
       ),
     );
     notifyListeners();
+  }
+
+  bool isEmpty() {
+    return _items.isEmpty;
   }
 }

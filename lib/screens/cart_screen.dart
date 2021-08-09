@@ -37,7 +37,7 @@ class CartScreen extends StatelessWidget {
                     // pretty label widget
                     Chip(
                       label: Text(
-                        '${cart.totalAmout} \$',
+                        '${cart.totalAmout.toStringAsFixed(2)} \$',
                         style: TextStyle(
                             color: Theme.of(context)
                                 .primaryTextTheme

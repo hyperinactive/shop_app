@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shop_app/providers/cart_provider.dart';
 import 'package:shop_app/screens/cart_screen.dart';
 import 'package:shop_app/widgets/cart_icon_button.dart';
+import 'package:shop_app/widgets/main_drawer.dart';
 import 'package:shop_app/widgets/products_grid_view.dart';
 
 enum FilterOptions {
@@ -26,6 +27,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
     //     Provider.of<Products>(context, listen: false);
 
     return Scaffold(
+      drawer: const MainDrawer(),
       appBar: AppBar(
         title: const Text('MyShop'),
         actions: <Widget>[
