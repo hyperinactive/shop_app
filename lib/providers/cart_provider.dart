@@ -59,6 +59,26 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void decrementItemQuantity(String id) {
+    if (!_items.containsKey(id)) {
+      return;
+    }
+    // if the product item exists in the cart and it's quantity is greated than 1
+    if (_items[id]!.quantity > 1) {
+      _items.update(
+          id,
+          (CartItemModel previousCartItem) => CartItemModel(
+                id: previousCartItem.id,
+                title: previousCartItem.title,
+                quantity: previousCartItem.quantity - 1,
+                price: previousCartItem.price,
+              ));
+    } else {
+      _items.remove(id);
+    }
+    notifyListeners();
+  }
+
   void clear() {
     _items = <String, CartItemModel>{};
     notifyListeners();

@@ -47,6 +47,33 @@ class ProductItem extends StatelessWidget {
               onPressed: () {
                 cart.addItem(
                     id: product.id, title: product.title, price: product.price);
+                // scaffold.of(context) establishes a connection to the nearest Scaffold widget
+                // nearest Scaffold from here, is products_overview's Scaffold
+                // can control that scaffold from here!
+                // Scaffold.of(context).openDrawer();
+
+                // deprecated
+                // Scaffold.of(context).showSnackBar(SnackBar(content: Container()));
+
+                // ScaffoldMessender connects to the nearest Scaffold
+                // SnackBar is just an alert message
+
+                // duration can be managed with Duration widget
+                // actions are additional functionality that can be added
+                // expects label and a callback, common thing -> undo action
+
+                // hiding the currenlty present snackbar cause if the user spams the button
+                // the bars should cancel the previous one and show themselves immediately
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text('Item added to cart'),
+                  duration: const Duration(seconds: 3),
+                  action: SnackBarAction(
+                      label: 'UNDO',
+                      onPressed: () {
+                        cart.decrementItemQuantity(product.id);
+                      }),
+                ));
               },
             ),
           ),

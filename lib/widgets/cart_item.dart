@@ -32,6 +32,35 @@ class CartItemWidget extends StatelessWidget {
         Provider.of<CartProvider>(context, listen: false)
             .removeItem(cartItemId);
       },
+      // add a confirmation step to dismiss stuff
+      // explects a Future<bool>
+      // showDialog conveniently returns a Future as well, so it can be used here
+      // resolving with a true will dismiss the item, false will cancel the attempt to dismiss it
+      confirmDismiss: (DismissDirection direction) {
+        // show dialog modasl and attach it to the Dissmisible
+        return showDialog<bool>(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+                  title: const Text('Are your sure?'),
+                  content: const Text('remove item from the cart?'),
+                  actions: <Widget>[
+                    // onPressed -> here I can controll what gets resolved in the Future
+                    // and make it "fit" what confirmDismiss needs, a Future<bool>
+                    TextButton(
+                        onPressed: () {
+                          // pop returns a Future that will resolve and return data if I so choose
+                          // returning true to match the bool type - the user pressed yes -> true
+                          Navigator.of(context).pop(true);
+                        },
+                        child: const Text('YES')),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        child: const Text('NO')),
+                  ],
+                ));
+      },
       // background is the layer behind the Dismissable's child
       // this is where colors, additional info etc. can be shown
       background: Container(
