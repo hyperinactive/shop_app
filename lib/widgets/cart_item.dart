@@ -24,7 +24,7 @@ class CartItemWidget extends StatelessWidget {
     return Dismissible(
       key: ValueKey<String>(id),
       // optional: specify the direction of swipe
-      // very natural to use endToStart (->) swipe motion
+      // very natural to use endToStart (<-) swipe motion
       direction: DismissDirection.endToStart,
       // provides with the direction the user swiped
       // useful when different swipes cause different results

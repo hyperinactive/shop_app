@@ -63,7 +63,7 @@ class CartProvider with ChangeNotifier {
     if (!_items.containsKey(id)) {
       return;
     }
-    // if the product item exists in the cart and it's quantity is greated than 1
+    // if the product item exists in the cart and its quantity is greated than 1
     if (_items[id]!.quantity > 1) {
       _items.update(
           id,
