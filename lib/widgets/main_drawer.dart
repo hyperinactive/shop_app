@@ -5,6 +5,26 @@ import 'package:shop_app/screens/user_products_screen.dart';
 class MainDrawer extends StatelessWidget {
   const MainDrawer({Key? key}) : super(key: key);
 
+  Widget buildDrawerListTile(
+    BuildContext context,
+    IconData iconData,
+    String title,
+    String routeName,
+  ) {
+    return Column(
+      children: <Widget>[
+        const Divider(),
+        ListTile(
+          leading: Icon(iconData),
+          title: Text(title),
+          onTap: () {
+            Navigator.of(context).pushReplacementNamed(routeName);
+          },
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -14,31 +34,23 @@ class MainDrawer extends StatelessWidget {
             title: const Text('placeholder'),
             automaticallyImplyLeading: false, // no back button
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.shop),
-            title: const Text('Shop'),
-            onTap: () {
-              Navigator.of(context).pushReplacementNamed('/');
-            },
+          buildDrawerListTile(
+            context,
+            Icons.shop,
+            'Shop',
+            '/',
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.payment),
-            title: const Text('Orders'),
-            onTap: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(OrdersScreen.routeName);
-            },
+          buildDrawerListTile(
+            context,
+            Icons.payment,
+            'Orders',
+            OrdersScreen.routeName,
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text('Manage products'),
-            onTap: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(UserProductsScreen.routeName);
-            },
+          buildDrawerListTile(
+            context,
+            Icons.edit,
+            'Manage products',
+            UserProductsScreen.routeName,
           )
         ],
       ),
