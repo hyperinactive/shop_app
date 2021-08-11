@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/product.dart';
+import 'package:shop_app/providers/products.dart';
+import 'package:uuid/uuid.dart';
 
-class EditProductScreen extends StatefulWidget {
-  const EditProductScreen({Key? key}) : super(key: key);
+class ManageProductScreeen extends StatefulWidget {
+  const ManageProductScreeen({Key? key}) : super(key: key);
   static const String routeName = '/edit-product';
 
   @override
-  _EditProductScreenState createState() => _EditProductScreenState();
+  _ManageProductScreeenState createState() => _ManageProductScreeenState();
 }
 
-class _EditProductScreenState extends State<EditProductScreen> {
+class _ManageProductScreeenState extends State<ManageProductScreeen> {
+  bool _isNew = true;
+
   // in flutter some managing of the form inputs is required
   // FocusNode enables focusing
   final FocusNode _priceFocus = FocusNode();
@@ -21,7 +27,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
   // form key needs to be added to the form to make the connection
   final GlobalKey<FormState> _formGK = GlobalKey<FormState>();
 
-  final Map<String, dynamic> _productMap = <String, dynamic>{};
+  final Map<String, dynamic> _productMap = <String, dynamic>{
+    'title': '',
+    'description': '',
+    'imageUrl': '',
+    'price': 0
+  };
 
   // expected to fire when _imageFocus looses focus
   // checking if focus if on the node
@@ -74,7 +85,33 @@ class _EditProductScreenState extends State<EditProductScreen> {
       return;
     }
     _formGK.currentState!.save();
-    print(_productMap);
+    final Products products = Provider.of<Products>(context, listen: false);
+
+    if (_isNew) {
+      final Product product = Product(
+        id: const Uuid().v4(),
+        title: _productMap['title'] as String,
+        description: _productMap['description'] as String,
+        price: _productMap['price'] as double,
+        imageUrl: _productMap['imageUrl'] as String,
+      );
+
+      // add to the state
+      products.addOne(product);
+    } else {
+      // update the product
+      final Product product = Product(
+          id: _productMap['id'] as String,
+          title: _productMap['title'] as String,
+          description: _productMap['description'] as String,
+          price: _productMap['price'] as double,
+          imageUrl: _productMap['imageUrl'] as String,
+          isFavorite: _productMap['isFavorite'] as bool);
+      products.updateOne(_productMap['id'] as String, product);
+    }
+
+    // return to the previous screen on the stack
+    Navigator.of(context).pop();
   }
 
   @override
@@ -83,6 +120,37 @@ class _EditProductScreenState extends State<EditProductScreen> {
     // this listener will be used to tell when user switched focus off the image input
     _imageFocus.addListener(_updateImage);
     super.initState();
+  }
+
+  // hacky way of using Modal to extract ags from the pushNamed mehtod
+  // cannot be done in the initState but it can be done inside didChangeDependencies
+  // to limit the number of calls for this to one, a bool is set up to ensure that
+  bool _isInit = true;
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      String productId = '';
+      // if args have been passed update productId
+      // don't make a new product but update an existing one via its id
+      if (ModalRoute.of(context) != null &&
+          ModalRoute.of(context)!.settings.arguments != null) {
+        productId = ModalRoute.of(context)!.settings.arguments as String;
+        _isNew = false;
+        final Product fProduct =
+            Provider.of<Products>(context, listen: false).findById(productId);
+        // fill the map with the data of the product to edit
+        _productMap['id'] = fProduct.id;
+        _productMap['title'] = fProduct.title;
+        _productMap['description'] = fProduct.description;
+        _productMap['price'] = fProduct.price;
+        _productMap['isFavorite'] = fProduct.isFavorite;
+        _imageUrlController.text = fProduct.imageUrl;
+      }
+    }
+    _isInit = false;
+
+    super.didChangeDependencies();
   }
 
   @override
@@ -106,7 +174,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
         title: const Text('Edit'),
         actions: <Widget>[
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              _saveForm();
+            },
             icon: const Icon(Icons.save),
           )
         ],
@@ -119,6 +189,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
               children: <Widget>[
                 // special inputs already connected to the form with properties like autocorrect, validaste etc
                 TextFormField(
+                  initialValue: _productMap['title'] as String,
                   validator: _validateEmpty,
                   decoration: const InputDecoration(labelText: 'Title'),
                   // means instead of submitting the focus will shift to the next input
@@ -134,6 +205,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   },
                 ),
                 TextFormField(
+                  initialValue: _productMap['price'].toString(),
                   validator: _validatePrice,
                   decoration: const InputDecoration(labelText: 'Price'),
                   keyboardType: TextInputType.number,
@@ -147,6 +219,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   },
                 ),
                 TextFormField(
+                  initialValue: _productMap['description'] as String,
                   validator: _validateLength,
                   decoration: const InputDecoration(labelText: 'Description'),
                   // adding more lines for the user to use
@@ -180,6 +253,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         // TextFormField takes as much space as it can
                         // needs a constrained parent
                         child: TextFormField(
+                      // have to be initialized in the controller
+                      // initialValue: _productMap['imageUrl'] as String,
                       validator: _validateUrl,
                       decoration: const InputDecoration(labelText: 'Image URL'),
                       keyboardType: TextInputType.url,

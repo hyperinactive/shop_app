@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/products.dart';
-import 'package:shop_app/screens/edit_product_screen.dart';
+import 'package:shop_app/screens/manage_product_screen.dart';
 import 'package:shop_app/widgets/main_drawer.dart';
 import 'package:shop_app/widgets/user_product_item.dart';
 
@@ -20,7 +20,7 @@ class UserProductsScreen extends StatelessWidget {
         actions: <Widget>[
           IconButton(
               onPressed: () {
-                Navigator.of(context).pushNamed(EditProductScreen.routeName);
+                Navigator.of(context).pushNamed(ManageProductScreeen.routeName);
               },
               icon: const Icon(Icons.add)),
         ],
@@ -31,8 +31,11 @@ class UserProductsScreen extends StatelessWidget {
           itemBuilder: (_, int index) => Column(
             children: <Widget>[
               UserProductItemWidget(
+                id: products.items[index].id,
                 title: products.items[index].title,
                 imageUrl: products.items[index].imageUrl,
+                deleteCb: products
+                    .deleteOne, // pass the delete function cb, dumb af as we're using prodivder already but whatev
               ),
               const Divider()
             ],
