@@ -34,6 +34,8 @@ class _ManageProductScreeenState extends State<ManageProductScreeen> {
     'price': 0
   };
 
+  bool _isLoading = false;
+
   // expected to fire when _imageFocus looses focus
   // checking if focus if on the node
   // if node, reresh the state and rerender, thus showing the image from the url
@@ -79,12 +81,15 @@ class _ManageProductScreeenState extends State<ManageProductScreeen> {
     return null;
   }
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
     final bool isValid = _formGK.currentState!.validate();
     if (!isValid) {
       return;
     }
     _formGK.currentState!.save();
+    setState(() {
+      _isLoading = true;
+    });
     final Products products = Provider.of<Products>(context, listen: false);
 
     if (_isNew) {
@@ -96,8 +101,50 @@ class _ManageProductScreeenState extends State<ManageProductScreeen> {
         imageUrl: _productMap['imageUrl'] as String,
       );
 
-      // add to the state
-      products.addOne(product);
+      try {
+        await products.addOne(product);
+      } catch (e) {
+        // ignore: implicit_dynamic_function
+        await showDialog(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+                  title: const Text('An error occured'),
+                  content: const Text('Something went wrong'),
+                  actions: <Widget>[
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('ok'))
+                  ],
+                ));
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      // await products.addOne(product).catchError((Object error) {
+      //   // ignore: implicit_dynamic_function
+      //   return showDialog(
+      //       context: context,
+      //       builder: (BuildContext context) => AlertDialog(
+      //             title: const Text('An error occured'),
+      //             content: const Text('Something went wrong'),
+      //             actions: <Widget>[
+      //               TextButton(
+      //                   onPressed: () {
+      //                     Navigator.of(context).pop();
+      //                   },
+      //                   child: const Text('ok'))
+      //             ],
+      //           ));
+      // })
+      // .then((_) {
+      // setState(() {
+      //   _isLoading = false;
+      // });
+      // Navigator.of(context).pop();
+      // });
     } else {
       // update the product
       final Product product = Product(
@@ -181,103 +228,112 @@ class _ManageProductScreeenState extends State<ManageProductScreeen> {
           )
         ],
       ),
-      body: Form(
-          key: _formGK,
-          child: Padding(
-            padding: const EdgeInsets.all(15),
-            child: ListView(
-              children: <Widget>[
-                // special inputs already connected to the form with properties like autocorrect, validaste etc
-                TextFormField(
-                  initialValue: _productMap['title'] as String,
-                  validator: _validateEmpty,
-                  decoration: const InputDecoration(labelText: 'Title'),
-                  // means instead of submitting the focus will shift to the next input
-                  // required TextInputAction
-                  textInputAction: TextInputAction.next,
-                  // whenever the 'finished' button fires
-                  onFieldSubmitted: (_) {
-                    // FocusScope used for switching focus
-                    FocusScope.of(context).requestFocus(_priceFocus);
-                  },
-                  onSaved: (String? title) {
-                    _productMap['title'] = title;
-                  },
-                ),
-                TextFormField(
-                  initialValue: _productMap['price'].toString(),
-                  validator: _validatePrice,
-                  decoration: const InputDecoration(labelText: 'Price'),
-                  keyboardType: TextInputType.number,
-                  textInputAction: TextInputAction.next,
-                  focusNode: _priceFocus, // add focus node
-                  onFieldSubmitted: (_) {
-                    FocusScope.of(context).requestFocus(_descriptionFocus);
-                  },
-                  onSaved: (String? price) {
-                    _productMap['price'] = double.parse(price!);
-                  },
-                ),
-                TextFormField(
-                  initialValue: _productMap['description'] as String,
-                  validator: _validateLength,
-                  decoration: const InputDecoration(labelText: 'Description'),
-                  // adding more lines for the user to use
-                  maxLines: 3,
-                  // keyboard suited for multiline input
-                  keyboardType: TextInputType.multiline,
-                  textInputAction: TextInputAction.next,
-                  focusNode: _descriptionFocus,
-                  onSaved: (String? description) {
-                    _productMap['description'] = description;
-                  },
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Form(
+              key: _formGK,
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: ListView(
                   children: <Widget>[
-                    Container(
-                      width: 100,
-                      height: 100,
-                      margin: const EdgeInsets.only(top: 8, right: 10),
-                      decoration: BoxDecoration(
-                        border: Border.all(width: 1, color: Colors.grey),
-                      ),
-                      child: _imageUrlController.text.isEmpty
-                          ? const Text('enter a URL')
-                          : FittedBox(
-                              // note: doesn't check for valid urls
-                              child: Image.network(_imageUrlController.text),
-                            ),
-                    ),
-                    Expanded(
-                        // TextFormField takes as much space as it can
-                        // needs a constrained parent
-                        child: TextFormField(
-                      // have to be initialized in the controller
-                      // initialValue: _productMap['imageUrl'] as String,
-                      validator: _validateUrl,
-                      decoration: const InputDecoration(labelText: 'Image URL'),
-                      keyboardType: TextInputType.url,
-                      textInputAction: TextInputAction.done, // no more inputs
-                      // form handles input controllers
-                      // but cause image must be previewed, we need access to the controller of this input
-                      controller: _imageUrlController,
-                      focusNode: _imageFocus,
-                      // onEditingComplete: () {
-                      //   setState(() {});
-                      // },
+                    // special inputs already connected to the form with properties like autocorrect, validaste etc
+                    TextFormField(
+                      initialValue: _productMap['title'] as String,
+                      validator: _validateEmpty,
+                      decoration: const InputDecoration(labelText: 'Title'),
+                      // means instead of submitting the focus will shift to the next input
+                      // required TextInputAction
+                      textInputAction: TextInputAction.next,
+                      // whenever the 'finished' button fires
                       onFieldSubmitted: (_) {
-                        _saveForm();
+                        // FocusScope used for switching focus
+                        FocusScope.of(context).requestFocus(_priceFocus);
                       },
-                      onSaved: (String? imageUrl) {
-                        _productMap['imageUrl'] = imageUrl;
+                      onSaved: (String? title) {
+                        _productMap['title'] = title;
                       },
-                    )),
+                    ),
+                    TextFormField(
+                      initialValue: _productMap['price'].toString(),
+                      validator: _validatePrice,
+                      decoration: const InputDecoration(labelText: 'Price'),
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                      focusNode: _priceFocus, // add focus node
+                      onFieldSubmitted: (_) {
+                        FocusScope.of(context).requestFocus(_descriptionFocus);
+                      },
+                      onSaved: (String? price) {
+                        _productMap['price'] = double.parse(price!);
+                      },
+                    ),
+                    TextFormField(
+                      initialValue: _productMap['description'] as String,
+                      validator: _validateLength,
+                      decoration:
+                          const InputDecoration(labelText: 'Description'),
+                      // adding more lines for the user to use
+                      maxLines: 3,
+                      // keyboard suited for multiline input
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.next,
+                      focusNode: _descriptionFocus,
+                      onSaved: (String? description) {
+                        _productMap['description'] = description;
+                      },
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        Container(
+                          width: 100,
+                          height: 100,
+                          margin: const EdgeInsets.only(top: 8, right: 10),
+                          decoration: BoxDecoration(
+                            border: Border.all(width: 1, color: Colors.grey),
+                          ),
+                          child: _imageUrlController.text.isEmpty
+                              ? const Text('enter a URL')
+                              : FittedBox(
+                                  // note: doesn't check for valid urls
+                                  child:
+                                      Image.network(_imageUrlController.text),
+                                ),
+                        ),
+                        Expanded(
+                            // TextFormField takes as much space as it can
+                            // needs a constrained parent
+                            child: TextFormField(
+                          // have to be initialized in the controller
+                          // initialValue: _productMap['imageUrl'] as String,
+                          validator: _validateUrl,
+                          decoration:
+                              const InputDecoration(labelText: 'Image URL'),
+                          keyboardType: TextInputType.url,
+                          textInputAction:
+                              TextInputAction.done, // no more inputs
+                          // form handles input controllers
+                          // but cause image must be previewed, we need access to the controller of this input
+                          controller: _imageUrlController,
+                          focusNode: _imageFocus,
+                          // onEditingComplete: () {
+                          //   setState(() {});
+                          // },
+                          onFieldSubmitted: (_) {
+                            _saveForm();
+                          },
+                          onSaved: (String? imageUrl) {
+                            _productMap['imageUrl'] = imageUrl;
+                          },
+                        )),
+                      ],
+                    )
                   ],
-                )
-              ],
+                ),
+              ),
             ),
-          )),
     );
   }
 }

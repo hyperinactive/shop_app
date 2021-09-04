@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shop_app/data/products_dummy_data.dart';
 import 'package:shop_app/providers/product.dart';
+import 'package:http/http.dart' as http;
 
 // NOTE: dart only supports one parent to be extend
 // mixins don't make a stong relation, just allows additional functions
@@ -29,17 +33,48 @@ class Products with ChangeNotifier {
         .toList();
   }
 
-  void addOne(Product product) {
-    // _items.add(value);
-    // telling widgets that hold a ref to our state that stuff is changing
-    final Product newProduct = Product(
-        id: product.id,
+  Future<void> addOne(Product product) async {
+    // creating url object to send http request
+    print(dotenv.env['DB_URL']);
+    final Uri url = Uri.parse('${dotenv.env['DB_URL']!}/products.json');
+
+    // no need to return futures as we've got async handle that
+    // return http.post...
+    try {
+      final response = await http.post(url,
+          body: json.encode(
+            <String, dynamic>{
+              'title': product.title,
+              'description': product.description,
+              'imageUrl': product.imageUrl,
+              'price': product.price,
+              'isFavorite': product.isFavorite,
+            },
+          ));
+
+      // .then((http.Response response) {
+      final Product newProduct = Product(
+        // decode id field from Firestore -- name
+        // ignore: avoid_dynamic_calls
+        id: json.decode(response.body)['name'].toString(),
         title: product.title,
         description: product.description,
         price: product.price,
-        imageUrl: product.imageUrl);
-    _items.add(product);
-    notifyListeners();
+        imageUrl: product.imageUrl,
+      );
+      _items.add(product);
+      notifyListeners();
+    } catch (e) {
+      print(e);
+      rethrow; // rethrow?
+    }
+
+    // })
+    // catching and throwing errors in flutter
+    // .catchError((Object error) {
+    // print(error);
+    // throw error;
+    // });
   }
 
   Product findById(String id) {
